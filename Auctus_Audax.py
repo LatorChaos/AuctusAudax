@@ -78,13 +78,7 @@ def send_resources(list_of_net_revenues):
                 session = bank_withdraw(net_rev, session)
 
 def sum_of_net_revs(list_of_net_revenues):
-    #given list of net revs, return one sum net rev dict
-    net_production = {"money" : 0, "coal": 0, "oil": 0, "uranium": 0, "lead": 0, "iron": 0, "bauxite": 0, "gasoline": 0, "munitions": 0, "steel": 0, "aluminum": 0, "food": 0}
-    for net_rev in list_of_net_revenues:
-        for key, value in net_rev.items():
-            if key != 'nation' and key != 'nation_name' and key != 'send':
-                net_production[key] += net_rev[key]
-    return net_production
+    return {k: sum(net_rev[k] for net_rev in list_of_net_revenues if k in net_rev and k) for k in set(k for d in list_of_net_revenues for k in d if k not in ('nation', 'nation_name', 'send'))}
     
 
 def audit_given_nations(api_data):
@@ -481,15 +475,15 @@ def calculate_net_revenue(api_data):
                             cityInfraCounter -= 100
                             nation_net_rev['oil'] -= 1.2
                             oil_power -= 1
-                        elif cityInfraCounter > 100 and cityInfraCounter <= 200:
+                        elif 100 < cityInfraCounter <= 200:
                             cityInfraCounter -= 200
                             nation_net_rev['oil'] -= 2.4
                             oil_power -= 1
-                        elif cityInfraCounter > 200 and cityInfraCounter <= 300:
+                        elif 200 < cityInfraCounter <= 300:
                             cityInfraCounter -= 300
                             nation_net_rev['oil'] -= 3.6
                             oil_power -= 1
-                        elif cityInfraCounter > 300 and cityInfraCounter <= 400:
+                        elif 300 < cityInfraCounter <= 400:
                             cityInfraCounter -= 400
                             nation_net_rev['oil'] -= 4.8
                             oil_power -= 1
@@ -502,15 +496,15 @@ def calculate_net_revenue(api_data):
                             cityInfraCounter -= 100
                             nation_net_rev['coal'] -= 1.2
                             coal_power -= 1
-                        elif cityInfraCounter > 100 and cityInfraCounter <= 200:
+                        elif 100 < cityInfraCounter <= 200:
                             cityInfraCounter -= 200
                             nation_net_rev['coal'] -= 2.4
                             coal_power -= 1
-                        elif cityInfraCounter > 200 and cityInfraCounter <= 300:
+                        elif 200 < cityInfraCounter <= 300:
                             cityInfraCounter -= 300
                             nation_net_rev['coal'] -= 3.6
                             coal_power -= 1
-                        elif cityInfraCounter > 300 and cityInfraCounter <= 400:
+                        elif 300 < cityInfraCounter <= 400:
                             cityInfraCounter -= 400
                             nation_net_rev['coal'] -= 4.8
                             coal_power -= 1
