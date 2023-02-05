@@ -435,47 +435,15 @@ def calculate_net_revenue(api_data):
                             nation_net_rev['uranium'] -= 1.2 #nuke_infra_batches * 
                         nukePower -= 1
                     elif oil_power > 0:
-                        if cityInfraCounter <= 100:
-                            cityInfraCounter -= 100
-                            nation_net_rev['oil'] -= 1.2
-                            oil_power -= 1
-                        elif 100 < cityInfraCounter <= 200:
-                            cityInfraCounter -= 200
-                            nation_net_rev['oil'] -= 2.4
-                            oil_power -= 1
-                        elif 200 < cityInfraCounter <= 300:
-                            cityInfraCounter -= 300
-                            nation_net_rev['oil'] -= 3.6
-                            oil_power -= 1
-                        elif 300 < cityInfraCounter <= 400:
-                            cityInfraCounter -= 400
-                            nation_net_rev['oil'] -= 4.8
-                            oil_power -= 1
-                        elif cityInfraCounter > 400:
-                            cityInfraCounter -= 500
-                            nation_net_rev['oil'] -= 6.0
-                            oil_power -= 1
+                        decrease = min(cityInfraCounter, 500)
+                        cityInfraCounter -= decrease
+                        nation_net_rev['oil'] -= math.ceil(decrease / 100) * 1.2
+                        oil_power -= 1
                     elif coal_power > 0:
-                        if cityInfraCounter <= 100:
-                            cityInfraCounter -= 100
-                            nation_net_rev['coal'] -= 1.2
-                            coal_power -= 1
-                        elif 100 < cityInfraCounter <= 200:
-                            cityInfraCounter -= 200
-                            nation_net_rev['coal'] -= 2.4
-                            coal_power -= 1
-                        elif 200 < cityInfraCounter <= 300:
-                            cityInfraCounter -= 300
-                            nation_net_rev['coal'] -= 3.6
-                            coal_power -= 1
-                        elif 300 < cityInfraCounter <= 400:
-                            cityInfraCounter -= 400
-                            nation_net_rev['coal'] -= 4.8
-                            coal_power -= 1
-                        elif cityInfraCounter > 400:
-                            cityInfraCounter -= 500
-                            nation_net_rev['coal'] -= 6.0
-                            coal_power -= 1
+                        decrease = min(cityInfraCounter, 500)
+                        cityInfraCounter -= decrease
+                        nation_net_rev['coal'] -= math.ceil(decrease / 100) * 1.2
+                        coal_power -= 1
                     elif nukePower  + oil_power + coal_power + wind_power <= 0:
                         cityInfraCounter = 0
                 
