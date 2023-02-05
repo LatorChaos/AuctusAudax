@@ -86,123 +86,87 @@ def audit_given_nations(api_data):
     nation_flags_dict_list = []
     for data_set in api_data:
         for nation in data_set['data']['nations']['data']:
-            nation_link = 'https://politicsandwar.com/nation/id=' + str(nation['id'])
-            nation_flags_dict = {'nation_link' : nation_link, 'cities_unpowered' : 0, 'needs_more_commerce' : 0, 'needs_less_commerce' : 0, 'incorrect_commerce_itc' : 0, 'incorrect_crime' : 0, 'incorrect_mil_improvs' : 0, 'unmaxed_air' : 0, 'needs_recycling_center' : 0, 'needs_subway' : 0, 'needs_hospital' : 0, 'refining_without_project' : 0, 'unused_slots' : 0, 'wrong_war_policy' : 0, 'incorrect_disease' : 0, 'manu_incorrect' : 0, 'raws_incorrect' : 0, 'farming_with_low_land' : 0, 'odd_infra' : 0, 'odd_land' : 0, 'infra_too_high' : 0, 'using_oilcoal_power' : 0, 'too_much_wind': 0}
-    
+            nation_flags_dict = {'nation_link': f'https://politicsandwar.com/nation/id={nation["id"]}'}
+
+            for city in nation['cities']:
+                city['crime'], city['disease'], city['population'], city['commerce'], city['age'], city[
+                    'pollution'] = calculate_city_stats(city, nation)
+
             if nation['aircraft'] < (nation['num_cities'] * 75):
                 nation_flags_dict['unmaxed_air'] = 1
-                
             if nation['war_policy'] != 'Fortress':
                 nation_flags_dict['wrong_war_policy'] = 1
-                
-            nation['radiation'] = determine_nation_radiation(nation['continent'], data_set['data']['game_info']['radiation'])
-                
-            for city in nation['cities']:
-                city['crime'], city['disease'], city['population'], city['commerce'], city['age'], city['pollution'] = calculate_city_stats(city, nation)
-                
-                used_improv_count = int(city["coal_power"]) + int(city["oil_power"]) + int(city["nuclear_power"]) + int(city["wind_power"]) + int(city["coal_mine"]) + int(city["oil_well"]) + int(city["bauxite_mine"]) + int(city["iron_mine"]) + int(city["lead_mine"]) + int(city["uranium_mine"]) + int(city["farm"]) + int(city["oil_refinery"]) + int(city["steel_mill"]) + int(city["aluminum_refinery"]) + int(city["munitions_factory"]) + int(city["police_station"]) + int(city["hospital"]) + int(city["recycling_center"]) + int(city["subway"]) + int(city["supermarket"]) + int(city["bank"]) + int(city["shopping_mall"]) + int(city["stadium"]) + int(city["barracks"]) + int(city["factory"]) + int(city["hangar"]) + int(city["drydock"])
-                max_improv_count = int(city["infrastructure"]/50)
+            if ["" for x in [[v for k, v in city.items() if k in ("oil_refinery", "steel_mill", "aluminum_refinery", "munitions_factory") and v not in (0, 5)] for city in nation['cities']] if len(x)]:
+                nation_flags_dict['manu_incorrect'] = 1
+            if ["" for x in [[v for k, v in city.items() if k in ("lead_mine", "iron_mine", "bauxite_mine", "coal_mine", "oil_well") and v not in (0, 10)] for city in nation['cities']] if len(x)] or [x for x in [[v for k, v in city.items() if k is "uranium_mine" and v not in (0, 5)] for city in nation['cities']] if len(x)] or [x for x in [[v for k, v in city.items() if k is "farm" and v not in (0, 20)] for city in nation['cities']] if len(x)]:
+                nation_flags_dict['raws_incorrect'] = 1
+            if ["" for x in [int(city["infrastructure"] / 50) - sum([v for k, v in city.items() if k in ("coal_power","oil_power","nuclear_power","wind_power","bauxite_mine","uranium_mine","farm","oil_refinery","steel_mill","aluminum_refinery","munitions_factory","police_station","hospital","recycling_center","subway","supermarket","bank","shopping_mall","stadium","barracks","factory","hangar","drydock")]) for city in nation['cities']] if x[1]]:
+                nation_flags_dict['unused_slots'] = 1
+            if ["" for city in nation["cities"] if city["powered"] is "No"]:
+                nation_flags_dict['cities_unpowered'] = 1
+            if ["" for city in nation["cities"] if city["infrastructure"] >= 1500 and city["commerce"] < 100] or (["" for city in nation["cities"] if city["infrastructure"] >= 1500 and city["commerce"] < 114] and nation['international_trade_center']):
+                nation_flags_dict['needs_more_commerce'] = 1
+            if ["" for city in nation["cities"] if city["crime"] > 0.05 and city["infrastructure"] >= 1500]:
+                nation_flags_dict['too_much_crime'] = 1
+            if nation["num_cities"] >= 10 and ["" for city in nation["cities"] if city["barracks"]>0 or city["factory"]>3 or city["drydock"]>0 or city["hanger"]<4]:
+                nation_flags_dict['incorrect_mil_improvs'] = 1
+            if ["" for city in nation["cities"] if city["infrastructure"]<1000 and city["commerce"]>0]:
+                nation_flags_dict['too_much_commerce'] = 1
+            if ["" for city in nation["cities"] if city["disease"]>0.02]:
+                nation_flags_dict['too_much_disease'] = 1
+            if ["" for city in nation["cities"] if city["infrastructure"]>=1500 and city["pollution"]>=70 and city["recycling_center"]<3 and city["disease"]>=3.5]:
+                nation_flags_dict['needs_recycling_center'] = 1
+            if ["" for city in nation["cities"] if city["infrastructure"]>=1500 and city["pollution"]>=45 and city["subway"]<1 and city["disease"]>=2.25]:
+                nation_flags_dict['needs_subway'] = 1
+            if ["" for city in nation["cities"] if city["infrastructure"]>=1500 and city["hospital"]<5 and city["disease"]>=2.5]:
+                nation_flags_dict['needs_hospital'] = 1
+            if ["" for city in nation["cities"] if city["oil_refinery"]*nation["emergency_gasoline_reserve"]!=city["oil_refinery"] or city["steel_mill"]*nation["iron_works"]!=city["steel_mill"] or city["aluminum_refinery"]*nation["bauxite_works"]!=city["aluminum_refinery"] or city["munitions_factory"]*nation["arms_stockpile"]!=city["munitions_factory"]]:
+                nation_flags_dict['refining_without_project'] = 1
+            if ["" for city in nation["cities"] if int(city["farm"]) and int(city["land"])<3000]:
+                nation_flags_dict['farming_with_low_land'] = 1
+            if ["" for city in nation["cities"] if city["infrastructure"] % 50 != 0]:
+                nation_flags_dict['odd_infra'] = 1
+            if ["" for city in nation["cities"] if city["land"] % 100 != 0]:
+                nation_flags_dict['odd_land'] = 1
+            if ["" for city in nation["cities"] if int(city["coal_power"]) or int(city["oil_power"])]:
+                nation_flags_dict['using_oilcoal_power'] = 1
+            if ["" for city in nation["cities"] if int(city["wind_power"])>1]:
+                nation_flags_dict['too_much_wind'] = 1
 
-                if used_improv_count < max_improv_count:
-                    nation_flags_dict['unused_slots'] = 1
-                    
-                if city["powered"] == 'No':
-                    nation_flags_dict['cities_unpowered'] = 1
-                if city["infrastructure"] >= 1500 and city["commerce"] < 100 and nation['international_trade_center'] <= 0:
-                    nation_flags_dict['needs_more_commerce'] = 1
-                if city["infrastructure"] >= 1500 and city["commerce"] < 114 and nation['international_trade_center'] >= 1:
-                    nation_flags_dict['incorrect_commerce_itc'] = 1
-                if city["infrastructure"] >= 1500 and city["crime"] > 0.05:
-                    nation_flags_dict['incorrect_crime'] = 1
-                if nation['num_cities'] >= 10:
-                    if city["barracks"] > 0 or city["factory"] > 3 or city["drydock"] > 0 or city["hangar"] < 4:
-                        nation_flags_dict['incorrect_mil_improvs'] = 1
-                if city["infrastructure"] < 1000 and city["commerce"] > 0:
-                    nation_flags_dict['needs_less_commerce'] = 1
-                    
-                if city['disease'] > 0.02:
-                    nation_flags_dict['incorrect_disease'] = 1
-                    
-                if city["infrastructure"] >= 1500 and city["pollution"] >= 70 and city['recycling_center'] < 3 and city['disease'] >= 3.5:
-                    nation_flags_dict['needs_recycling_center'] = 1
-                if city["infrastructure"] >= 1500 and city["pollution"] >= 45 and city['subway'] < 1 and city['disease'] >= 2.25:
-                    nation_flags_dict['needs_subway'] = 1
-                if city["infrastructure"] >= 1500 and city['disease'] >= 2.5 and city["hospital"] < 5:
-                    nation_flags_dict['needs_hospital'] = 1
-                    
-                if city["oil_refinery"] > 0 and nation['emergency_gasoline_reserve'] <= 0:
-                    nation_flags_dict['refining_without_project'] = 1
-                if city["steel_mill"] > 0 and nation['iron_works'] <= 0:
-                    nation_flags_dict['refining_without_project'] = 1
-                if city["aluminum_refinery"] > 0 and nation['bauxite_works'] <= 0:
-                    nation_flags_dict['refining_without_project'] = 1
-                if city["munitions_factory"] > 0 and nation['arms_stockpile'] <= 0:
-                    nation_flags_dict['refining_without_project'] = 1
-                    
-                if int(city["oil_refinery"]) > 0 and int(city["oil_refinery"]) < 5:
-                    nation_flags_dict['manu_incorrect'] = 1
-                elif int(city["steel_mill"]) > 0 and int(city["steel_mill"]) < 5:
-                    nation_flags_dict['manu_incorrect'] = 1
-                elif int(city["aluminum_refinery"]) > 0 and int(city["aluminum_refinery"]) < 5:
-                    nation_flags_dict['manu_incorrect'] = 1
-                elif int(city["munitions_factory"]) > 0 and int(city["munitions_factory"]) < 5:
-                    nation_flags_dict['manu_incorrect'] = 1
-                    
-                if int(city["coal_mine"]) > 0 and int(city["coal_mine"]) < 10:
-                    nation_flags_dict['raws_incorrect'] = 1
-                elif int(city["oil_well"]) > 0 and int(city["oil_well"]) < 10:
-                    nation_flags_dict['raws_incorrect'] = 1
-                elif int(city["bauxite_mine"]) > 0 and int(city["bauxite_mine"]) < 10:
-                    nation_flags_dict['raws_incorrect'] = 1
-                elif int(city["iron_mine"]) > 0 and int(city["iron_mine"]) < 10:
-                    nation_flags_dict['raws_incorrect'] = 1
-                elif int(city["lead_mine"]) > 0 and int(city["lead_mine"]) < 10:
-                    nation_flags_dict['raws_incorrect'] = 1
-                elif int(city["uranium_mine"]) > 0 and int(city["uranium_mine"]) < 5:
-                    nation_flags_dict['raws_incorrect'] = 1
-                elif int(city["farm"]) > 0 and int(city["farm"]) < 20:
-                    nation_flags_dict['raws_incorrect'] = 1
-                    
-                if int(city["farm"]) > 0 and int(city["land"]) < 3000:
-                    nation_flags_dict['farming_with_low_land'] = 1
-                    
-                if int(city['infrastructure']) % 50 != 0:
-                    nation_flags_dict['odd_infra'] = 1
-                    
-                if int(city['land']) % 100 != 0:
-                    nation_flags_dict['odd_land'] = 1
-                    
-                if int(city['coal_power']) > 0 or int(city['oil_power']) > 0:
-                    nation_flags_dict['using_oilcoal_power'] = 1
-                    
-                if int(city['wind_power']) > 1:
-                    nation_flags_dict['too_much_wind'] = 1
-                    
-                if nation['num_cities'] < 10:
-                    if int(city['infrastructure']) > 1500:
-                        nation_flags_dict['infra_too_high'] = 1
-                elif nation['num_cities'] >= 10 and nation['num_cities'] < 16:
-                    if int(city['infrastructure']) > 2000:
-                        nation_flags_dict['infra_too_high'] = 1
-                elif nation['num_cities'] >= 16 and nation['num_cities'] < 20:
-                    if int(city['infrastructure']) > 2250:
-                        nation_flags_dict['infra_too_high'] = 1
-                elif nation['num_cities'] >= 20 and nation['num_cities'] < 26:
-                    if int(city['infrastructure']) > 2500:
-                        nation_flags_dict['infra_too_high'] = 1
-                elif nation['num_cities'] >= 26 and nation['num_cities'] < 30:
-                    if int(city['infrastructure']) > 2700:
-                        nation_flags_dict['infra_too_high'] = 1
-                elif nation['num_cities'] >= 30 and nation['num_cities'] < 35:
-                    if int(city['infrastructure']) > 3000:
-                        nation_flags_dict['infra_too_high'] = 1
-                elif nation['num_cities'] >= 35 and nation['num_cities'] < 40:
-                    if int(city['infrastructure']) > 3300:
-                        nation_flags_dict['infra_too_high'] = 1
-                elif nation['num_cities'] >= 40:
-                    if int(city['infrastructure']) > 3600:
-                        nation_flags_dict['infra_too_high'] = 1
-                        
+            match nation['num_cities']:
+                case range(1, 10):
+                    for city in nation['cities']:
+                        if int(city['infrastructure']) > 1500:
+                            nation_flags_dict['infra_too_high'] = 1
+                case range(10, 16):
+                    for city in nation['cities']:
+                        if int(city['infrastructure']) > 2000:
+                            nation_flags_dict['infra_too_high'] = 1
+                case range(16, 20):
+                    for city in nation['cities']:
+                        if int(city['infrastructure']) > 2250:
+                            nation_flags_dict['infra_too_high'] = 1
+                case range(20, 26):
+                    for city in nation['cities']:
+                        if int(city['infrastructure']) > 2500:
+                            nation_flags_dict['infra_too_high'] = 1
+                case range(26, 30):
+                    for city in nation['cities']:
+                        if int(city['infrastructure']) > 2700:
+                            nation_flags_dict['infra_too_high'] = 1
+                case range(30, 35):
+                    for city in nation['cities']:
+                        if int(city['infrastructure']) > 3000:
+                            nation_flags_dict['infra_too_high'] = 1
+                case range(35, 40):
+                    for city in nation['cities']:
+                        if int(city['infrastructure']) > 3300:
+                            nation_flags_dict['infra_too_high'] = 1
+                case _:
+                    for city in nation['cities']:
+                        if int(city['infrastructure']) > 3300:
+                            nation_flags_dict['infra_too_high'] = 1
+
             nation_flags_dict_list.append(nation_flags_dict)
     return nation_flags_dict_list
 
