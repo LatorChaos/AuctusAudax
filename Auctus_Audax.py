@@ -570,6 +570,5 @@ def main():
     print(dt.datetime.today())
     print("\n\nMACHINATIO SPIRITUUM CETERA, GRATIAS TIBI DAMUS")
 
-main()
-
-
+if __name__ == "__main__":
+    main()
