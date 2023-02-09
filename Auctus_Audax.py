@@ -220,7 +220,7 @@ def mod_net_revs_for_wc(list_of_net_revenues):
                     net_rev['steel'] += (net_rev['nation']['num_cities'] * 750) - net_rev['nation']['steel']
                 if net_rev['nation']['munitions'] < net_rev['nation']['num_cities'] * 650:
                     net_rev['munitions'] += (net_rev['nation']['num_cities'] * 650) - net_rev['nation']['munitions']
-                if net_rev['nation']['gasoline'] < net_rev['nation']['num_citmod_net_revs_for_wc(ies'] * 625:
+                if net_rev['nation']['gasoline'] < net_rev['nation']['num_cities'] * 625:
                     net_rev['gasoline'] += (net_rev['nation']['num_cities'] * 625) - net_rev['nation']['gasoline']
                 if net_rev['nation']['money'] < net_rev['nation']['num_cities'] * 500000 * wc_money_multipler:
                     net_rev['money'] += (net_rev['nation']['num_cities'] * 500000 * wc_money_multipler) - net_rev['nation']['money']
