@@ -99,7 +99,7 @@ def audit_given_nations(api_data):
                 nation_flags_dict['manu_incorrect'] = 1
             if ["" for x in [[v for k, v in city.items() if k in ("lead_mine", "iron_mine", "bauxite_mine", "coal_mine", "oil_well") and v not in (0, 10)] for city in nation['cities']] if len(x)] or [x for x in [[v for k, v in city.items() if k is "uranium_mine" and v not in (0, 5)] for city in nation['cities']] if len(x)] or [x for x in [[v for k, v in city.items() if k is "farm" and v not in (0, 20)] for city in nation['cities']] if len(x)]:
                 nation_flags_dict['raws_incorrect'] = 1
-            if ["" for x in [int(city["infrastructure"] / 50) - sum([v for k, v in city.items() if k in ("coal_power","oil_power","nuclear_power","wind_power","bauxite_mine","uranium_mine","farm","oil_refinery","steel_mill","aluminum_refinery","munitions_factory","police_station","hospital","recycling_center","subway","supermarket","bank","shopping_mall","stadium","barracks","factory","hangar","drydock")]) for city in nation['cities']] if x[1]]:
+            if any([int(city["infrastructure"] / 50) - sum([v for k, v in city.items() if k in ("coal_power","oil_power","nuclear_power","wind_power","bauxite_mine","uranium_mine","farm","oil_refinery","steel_mill","aluminum_refinery","munitions_factory","police_station","hospital","recycling_center","subway","supermarket","bank","shopping_mall","stadium","barracks","factory","hangar","drydock")]) for city in nation['cities']]):
                 nation_flags_dict['unused_slots'] = 1
             if ["" for city in nation["cities"] if city["powered"] is "No"]:
                 nation_flags_dict['cities_unpowered'] = 1
@@ -107,7 +107,7 @@ def audit_given_nations(api_data):
                 nation_flags_dict['needs_more_commerce'] = 1
             if ["" for city in nation["cities"] if city["crime"] > 0.05 and city["infrastructure"] >= 1500]:
                 nation_flags_dict['too_much_crime'] = 1
-            if nation["num_cities"] >= 10 and ["" for city in nation["cities"] if city["barracks"]>0 or city["factory"]>3 or city["drydock"]>0 or city["hanger"]<4]:
+            if nation["num_cities"] >= 10 and ["" for city in nation["cities"] if city["barracks"]>0 or city["factory"]>3 or city["drydock"]>0 or city["hangar"]<4]:
                 nation_flags_dict['incorrect_mil_improvs'] = 1
             if ["" for city in nation["cities"] if city["infrastructure"]<1000 and city["commerce"]>0]:
                 nation_flags_dict['too_much_commerce'] = 1
