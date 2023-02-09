@@ -89,8 +89,7 @@ def audit_given_nations(api_data):
             nation_flags_dict = {'nation_link': f'https://politicsandwar.com/nation/id={nation["id"]}'}
 
             for city in nation['cities']:
-                city['crime'], city['disease'], city['population'], city['commerce'], city['age'], city[
-                    'pollution'] = calculate_city_stats(city, nation)
+                city['crime'], city['disease'], city['population'], city['commerce'], city['age'], city['pollution'] = calculate_city_stats(city, nation)
 
             if nation['aircraft'] < (nation['num_cities'] * 75):
                 nation_flags_dict['unmaxed_air'] = 1
