@@ -78,7 +78,7 @@ def send_resources(list_of_net_revenues):
                 session = bank_withdraw(net_rev, session)
 
 def sum_of_net_revs(list_of_net_revenues):
-    return {k: sum(net_rev[k] for net_rev in list_of_net_revenues if k in net_rev and k) for k in set(k for d in list_of_net_revenues for k in d if k not in ('nation', 'nation_name', 'send'))}
+    return {resource: sum(net_rev[resource] for net_rev in list_of_net_revenues if resource in net_rev and resource) for resource in set(key for net_rev in list_of_net_revenues for key in net_rev if key not in ('nation', 'nation_name', 'send'))}
     
 
 def audit_given_nations(api_data):
@@ -173,7 +173,7 @@ def mod_net_revenues(list_of_net_revenues):
     #given list of net revenues, modifiy them based off settings and clean them up
     for net_rev in list_of_net_revenues:
         for key, value in net_rev.items():
-            if key != 'nation':
+            if key not in ['nation', 'nation_name', 'send']:
                 if value >= 0:
                     net_rev[key] = 0
                 else:
@@ -184,7 +184,7 @@ def mod_net_revenues(list_of_net_revenues):
                     net_rev[key] = int(math.ceil(net_rev[key]))
                     if top_off:
                         net_rev[key] -= net_rev['nation'][key]
-                        if value <= 0:
+                        if net_rev[key] <= 0:
                             net_rev[key] = 0
     return list_of_net_revenues
 
@@ -220,7 +220,7 @@ def mod_net_revs_for_wc(list_of_net_revenues):
                     net_rev['steel'] += (net_rev['nation']['num_cities'] * 750) - net_rev['nation']['steel']
                 if net_rev['nation']['munitions'] < net_rev['nation']['num_cities'] * 650:
                     net_rev['munitions'] += (net_rev['nation']['num_cities'] * 650) - net_rev['nation']['munitions']
-                if net_rev['nation']['gasoline'] < net_rev['nation']['num_cities'] * 625:
+                if net_rev['nation']['gasoline'] < net_rev['nation']['num_citmod_net_revs_for_wc(ies'] * 625:
                     net_rev['gasoline'] += (net_rev['nation']['num_cities'] * 625) - net_rev['nation']['gasoline']
                 if net_rev['nation']['money'] < net_rev['nation']['num_cities'] * 500000 * wc_money_multipler:
                     net_rev['money'] += (net_rev['nation']['num_cities'] * 500000 * wc_money_multipler) - net_rev['nation']['money']
@@ -488,7 +488,14 @@ def calculate_net_revenue(api_data):
             list_of_net_revenues.append(nation_net_rev)
             
     return list_of_net_revenues
-                
+
+def print_net_revs(list_of_net_revenues):
+    for nation in list_of_net_revenues:
+        net_production = {"nation_id" : nation['nation']['id'], "money" : 0, "coal": 0, "oil": 0, "uranium": 0, "lead": 0, "iron": 0, "bauxite": 0, "gasoline": 0, "munitions": 0, "steel": 0, "aluminum": 0, "food": 0}
+        for key in nation:
+            if key not in ['nation', 'nation_name', 'send']:
+                net_production[key] = nation[key]
+        print(net_production)
                 
 def main():
     #main script body
@@ -508,10 +515,13 @@ def main():
     
     print("\nPROGRAMEE DATA:")
     print(list_of_net_revenues)
+    print("\nPROGRAMEE DAILY NET PRODUCTIONS:")
+    print_net_revs(list_of_net_revenues)
     print("\nPROGRAM DAILY NET PRODUCTION:")
     print(sum_of_net_revs(list_of_net_revenues))
     
     list_of_net_revenues = mod_net_revenues(list_of_net_revenues) #calculating what and how much to send
+    print_net_revs(list_of_net_revenues)
     
     if send_WC:
         list_of_net_revenues = mod_net_revs_for_wc(list_of_net_revenues) #making sure everything is within WC parameters
