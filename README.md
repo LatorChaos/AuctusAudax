@@ -9,7 +9,7 @@ Usage Instructions
       Example: pip install bs4
       Module dependences as of typing: requests, json, math, time, copy, datetime, bs4
 3. Right click on Auctus_Audax.py and click, "Edit with IDLE"
-4. Configure settings and set variables as desired and needed
+4. Configure settings and set variables as desired and needed in config.json
     a. api_tax_dict, dump_to_offshore, offshore_name, top_off, send_WC, send_war_WC, wc_money_multipler, days_of_supply, send_food_and_uranium_buffer, food_and_uranium_buffer_multiplier, run_audit, user_email, user_password, user_alliance_id, sender_api_key, headers
     b. The script is NOT ready to run out of the box and NEEDS to be configured with proper variables set
 5. I recommend not engaging this script wrecklessly and not starting it too close to a turn change as it will fail if it runs into a turn change
