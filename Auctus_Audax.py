@@ -547,7 +547,6 @@ def main():
     print(sum_of_net_revs(list_of_net_revenues))
     
     list_of_net_revenues = mod_net_revenues(list_of_net_revenues) #calculating what and how much to send
-    print_net_revs(list_of_net_revenues)
     
     if send_WC:
         list_of_net_revenues = mod_net_revs_for_wc(list_of_net_revenues) #making sure everything is within WC parameters
