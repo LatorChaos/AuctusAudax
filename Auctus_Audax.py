@@ -3,8 +3,6 @@ import datetime as dt
 from bs4 import BeautifulSoup
 
 with open("conf.json") as conf:
-    print(conf)
-    print(str(conf))
     conf = json.load(conf)
     api_tax_dict = conf["api_tax_dict"]
     dump_to_offshore = conf["dump_to_offshore"]
@@ -21,7 +19,6 @@ with open("conf.json") as conf:
     user_password = conf['user_password'] #User password of the sender
     user_alliance_id = conf['user_alliance_id'] #Alliance ID of the sender
     sender_api_key = conf['sender_api_key']
-    print(top_off, send_food_and_uranium_buffer, user_email)
 
 headers = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36' #Periodcally update this with the most common user agent
 
