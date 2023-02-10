@@ -51,6 +51,35 @@ def bank_withdraw(net_rev, session):
 
     return session
 
+def send_to_alliance(alliance_name, resource_dict, session):
+    #given net_rev and authorized login session, send corresponding leader_name corresponding resources
+    r = session.get('https://politicsandwar.com/alliance/id=' + user_alliance_id + '&display=bank')
+    soup = BeautifulSoup(r.content, 'html.parser')
+    token = soup.find('input', {'name':'token'})['value']
+    
+    send_message_payload = {'withmoney':resource_dict['money'],
+                            'withfood':resource_dict['food'],
+                            'withcoal':resource_dict['coal'],
+                            'withoil':resource_dict['oil'],
+                            'withuranium':resource_dict['uranium'],
+                            'withlead':resource_dict['lead'],
+                            'withiron':resource_dict['iron'],
+                            'withbauxite':resource_dict['bauxite'],
+                            'withgasoline':resource_dict['gasoline'],
+                            'withmunitions':resource_dict['munitions'],
+                            'withsteel':resource_dict['steel'],
+                            'withaluminum':resource_dict['aluminum'],
+                            "withtype": "Alliance",
+                            "withrecipient": alliance_name,
+                            "withnote": "Dump to offshore - love Malleator",
+                            "withsubmit": "Withdraw",
+                            "token": token}
+    print(send_message_payload)
+    send_message_url = 'https://politicsandwar.com/alliance/id=' + user_alliance_id + '&display=bank'
+    res = session.post(send_message_url, data=send_message_payload)
+
+    return session
+
 def login(email, password):
     #given email and password, login to pnw website and return session s
     #print("\nLogging in...")
@@ -72,6 +101,7 @@ def send_resources(list_of_net_revenues):
             user_input = input('Send? (Y/N)').replace(' ','').replace('Y','y')
             if user_input == 'y':
                 session = bank_withdraw(net_rev, session)
+    return session
 
 def sum_of_net_revs(list_of_net_revenues):
     return {resource: sum(net_rev[resource] for net_rev in list_of_net_revenues if resource in net_rev and resource) for resource in set(key for net_rev in list_of_net_revenues for key in net_rev if key not in ('nation', 'nation_name', 'send'))}
@@ -535,8 +565,17 @@ def main():
 
     user_input = input("\nBegin sending resources? (Y/N)").replace(' ','').replace('Y','y')
     if user_input == 'y':
-        send_resources(list_of_net_revenues)
+        session = send_resources(list_of_net_revenues)
 
+    if dump_to_offshore:
+        current_bank_contents = json.loads(requests.post('https://politicsandwar.com/api/alliance-bank/?allianceid=' + user_alliance_id + '&key=' + sender_api_key).text)['alliance_bank_contents'][0]
+        print("\nNEW BANK CONTENTS:")
+        print(current_bank_contents)
+        user_input = input("\nDump to offshore? (Y/N)").replace(' ','').replace('Y','y')
+        if user_input == 'y':
+            if 'session' not in globals() and 'session' not in locals():
+                session = login(user_email, user_password)
+            send_to_alliance(offshore_name, current_bank_contents, session)
     
 
     print("\nTotal elapsed time (sec): " + str(time.time() - start_time))
