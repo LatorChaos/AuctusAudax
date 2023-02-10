@@ -1,0 +1,20 @@
+{
+  "dump_to_offshore": true,
+  "offshore_name": "Rain",
+  "top_off": true,
+  "send_wc": false,
+  "send_war_wc": true,
+  "wc_money_multiplier": 2.0,
+  "days_of_supply": 3.0,
+  "send_food_and_uranium_buffer": true,
+  "food_and_uranium_buffer_multiplier": 2.0,
+  "run_audit": true,
+
+
+  "user_email": "user_email@provider.com",
+  "user_password": "user_password",
+  "user_alliance_id": "6088",
+  "sender_api_key": "Sender_Api_Key",
+
+  "api_tax_dict": {"Api_Key" : 11656}
+}

@@ -2,27 +2,23 @@ import requests, json, math, time, copy
 import datetime as dt
 from bs4 import BeautifulSoup
 
-api_tax_dict = {'APIKEYHERE' : 11656} #api key : tax bracket id - api key must have access to gov of corresponding tax id
-
-dump_to_offshore = True #True means dump bank contents to offshore when sending is done
-offshore_name = 'Rain' #Name of the offshore
-
-top_off = True #Top off True means bring targets to specified days of supply, False means just send them however many days of supplies is specified
-
-send_WC = False #True sends WC, False sends no WC
-send_war_WC = False #True sends war time WC as defined later in the script, False means regular WC is sent as it is defined
-wc_money_multipler = 2.0 #Multiplies WC money requirement by this number
-
-days_of_supply = 3.0 #Targeted days of supplies
-send_food_and_uranium_buffer = True #True means the food and uranium buffer multipler will be applied
-food_and_uranium_buffer_multiplier = 2.0 #Multiplies food and uranium supply by this number
-
-run_audit = True #If True, a basic audit will be supplied
-
-user_email = 'anEmail@mail.com' #User email of the sender
-user_password = 'SENDERpasswordHERE' #User password of the sender
-user_alliance_id = '6088' #Alliance ID of the sender
-sender_api_key = 'APIKEYHERE'
+with open("conf.json") as conf:
+    conf = json.load(conf)
+    api_tax_dict = conf["api_tax_dict"]
+    dump_to_offshore = conf["dump_to_offshore"]
+    offshore_name = conf["offshore_name"]
+    top_off = conf["top_off"]
+    send_WC = conf["send_wc"]
+    send_war_WC = conf["send_war_wc"]
+    wc_money_multipler = conf["wc_money_multiplier"]
+    days_of_supply = conf["days_of_supply"]
+    send_food_and_uranium_buffer = conf["send_food_and_uranium_buffer"]
+    food_and_uranium_buffer_multiplier = conf["food_and_uranium_buffer_multiplier"]
+    run_audit = conf["run_audit"]
+    user_email = conf['user_email'] #User email of the sender
+    user_password = conf['user_password'] #User password of the sender
+    user_alliance_id = conf['user_alliance_id'] #Alliance ID of the sender
+    sender_api_key = conf['sender_api_key']
 
 headers = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36' #Periodcally update this with the most common user agent
 
