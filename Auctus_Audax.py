@@ -386,6 +386,9 @@ def calculate_net_revenue(api_data):
             nation['radiation'] = determine_nation_radiation(nation['continent'], data_set['data']['game_info']['radiation'])
             
             foodRadMultipler = 1 - ((nation['radiation'] + data_set['data']['game_info']['radiation']['global'])/1000)
+            
+            nation_net_rev['food'] -= (nation['population'] / 1000)
+            nation_net_rev['food'] -= (nation['soldiers'] / 750) #ignoring wars
 
             for city in nation['cities']:
                 city['crime'], city['disease'], city['population'], city['commerce'], city['age'], city['pollution'] = calculate_city_stats(city, nation)
